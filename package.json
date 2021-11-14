@@ -1,0 +1,39 @@
+{
+  "name": "stivolution_project",
+  "version": "0.0.2-gndrng.1",
+  "description": "Projek integrasi database stikom dengan telegram bot",
+  "main": "app/index.js",
+  "scripts": {
+    "start": "npx tsc && npx pm2 start app/src/index.js --name Stivolution --no-daemon --restart-delay 5000 -f",
+    "dev": "npx tsc && npx pm2 start app/src/index.js --name Stivolution --no-daemon --restart-delay 5000 --watch app/ -f"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dickymuliafiqri/stivolution_project.git"
+  },
+  "author": "dickymuliafiqri",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dickymuliafiqri/stivolution_project/issues"
+  },
+  "homepage": "https://github.com/dickymuliafiqri/stivolution_project#readme",
+  "devDependencies": {
+    "@types/node": "^16.11.4",
+    "@types/sqlite3": "^3.1.7",
+    "@types/speedtest-net": "^2.1.1",
+    "prettier": "^2.4.1",
+    "typescript": "^4.4.4"
+  },
+  "dependencies": {
+    "axios": "^0.24.0",
+    "dotenv": "^10.0.0",
+    "node-cron": "^3.0.0",
+    "pm2": "^5.1.2",
+    "simple-git": "^2.47.0",
+    "speedtest-net": "^2.2.0",
+    "sqlite3": "^4.2.0",
+    "systeminformation": "^5.9.12",
+    "telegram": "^1.9.6",
+    "tgsnake": "^2.0.0-alpha.1"
+  }
+}
