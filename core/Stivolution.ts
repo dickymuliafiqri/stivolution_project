@@ -240,7 +240,9 @@ export class Stivolution extends StivolutionBaseClass {
         sessionString += `\n<code>${await this._bot.client.session.save()}</code>`;
         sessionString += "\n----------";
 
-        await this._bot.telegram.sendMessage(this._chatLog, sessionString);
+        await this._bot.telegram.sendMessage(this._chatLog, sessionString, {
+          parseMode: "HTML",
+        });
       }
     })) as Snake;
   }
