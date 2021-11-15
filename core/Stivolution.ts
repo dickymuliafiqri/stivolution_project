@@ -245,15 +245,14 @@ export class Stivolution extends StivolutionBaseClass {
         sessionString += `\n<code>${await this._bot.client.session.save()}</code>`;
         sessionString += "\n----------";
 
-        setInterval(async () => {
-          console.log("Bot is " + this._bot.client.disconnected);
-          if (!this._bot.client.disconnected) await this._bot.client.connect();
-        }, 1000);
-
         await this._bot.telegram.sendMessage(this._chatLog, sessionString, {
           parseMode: "HTML"
         });
       }
+      setInterval(async () => {
+        console.log("Bot is " + this._bot.client.disconnected);
+        if (!this._bot.client.disconnected) await this._bot.client.connect();
+      }, 1000);
     })) as Snake;
   }
 
