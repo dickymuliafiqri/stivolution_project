@@ -48,7 +48,7 @@ export class Stivolution extends StivolutionBaseClass {
 
     // Initialize error handler
     this._bot.catch(async (err, ctx) => {
-      const userId = ctx.from?.id || ctx.userId;
+      const userId = ctx?.from?.id || ctx?.userId;
       let context: string;
 
       // Stringify context
@@ -102,27 +102,32 @@ export class Stivolution extends StivolutionBaseClass {
           console.log("🐍 Configuring repository upstream...");
 
           await this._git
-            .init()
-            .addRemote("origin", this.__url__, ["-t", this._branch]);
-          await this._git.fetch("origin", this._branch);
+              .init()
+              .addRemote("origin", this.__url__, ["-t", this._branch]);
+          await this._git.fetch("origin");
           await this._git.checkout([
-            "-b",
+            "-B",
             this._branch,
             "--track",
             `origin/${this._branch}`,
-            "-f",
+            "-f"
           ]);
         }
       });
 
+      /**
+       * TODO
+       *
+       * - Send this message
+       */
       const toReportRestart = Number(getEnv("TO_REPORT_RESTART", false) || 0);
       if (toReportRestart) {
         console.log("🐍 Successfully restart, sending report...");
         await this._bot.telegram
-          .sendMessage(toReportRestart, "Berhasil memulai ulang")
-          .then(() => {
-            exec("TO_REPORT_RESTART=0");
-          });
+            .sendMessage(toReportRestart, "Berhasil memulai ulang")
+            .then(() => {
+              exec("TO_REPORT_RESTART=0");
+            });
       }
 
       console.log("🐍 Sending botInfo to CHAT_LOG...");
@@ -235,13 +240,28 @@ export class Stivolution extends StivolutionBaseClass {
       if (!process.env["STRING_SESSION"]) {
         // Print one to console
         let sessionString: string =
-          "This is your string session, pass it to config.env!\n";
+            "This is your string session, pass it to config.env!\n";
         sessionString += "\n----------";
         sessionString += `\n<code>${await this._bot.client.session.save()}</code>`;
         sessionString += "\n----------";
 
-        await this._bot.telegram.sendMessage(this._chatLog, sessionString);
+        await this._bot.telegram.sendMessage(this._chatLog, sessionString, {
+          parseMode: "HTML"
+        });
       }
+
+      // Configure client
+      this._bot.client.floodSleepThreshold = 0;
+
+      // Try to reconnect client when it disconnected
+      setInterval(async () => {
+        if (!this._bot.client._sender?._userConnected) {
+          await this._bot.client.connect().then(async () => {
+            await this._bot.telegram.sendMessage(this._chatLog, "Bot reconnected!");
+          });
+        }
+        ;
+      }, 1000);
     })) as Snake;
   }
 
