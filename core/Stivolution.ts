@@ -102,11 +102,11 @@ export class Stivolution extends StivolutionBaseClass {
           console.log("🐍 Configuring repository upstream...");
 
           await this._git
-            .init()
-            .addRemote("origin", this.__url__, ["-t", this._branch]);
-          await this._git.fetch("origin", this._branch);
+              .init()
+              .addRemote("origin", this.__url__, ["-t", this._branch]);
+          await this._git.fetch("origin");
           await this._git.checkout([
-            "-b",
+            "-B",
             this._branch,
             "--track",
             `origin/${this._branch}`,
@@ -249,9 +249,18 @@ export class Stivolution extends StivolutionBaseClass {
           parseMode: "HTML"
         });
       }
+
+      // Configure client
+      this._bot.client.floodSleepThreshold = 0;
+
+      // Try to reconnect client when it disconnected
       setInterval(async () => {
-        console.log("Bot is " + this._bot.client.disconnected);
-        if (!this._bot.client.disconnected) await this._bot.client.connect();
+        if (!this._bot.client._sender?._userConnected) {
+          await this._bot.client.connect().then(async () => {
+            await this._bot.telegram.sendMessage(this._chatLog, "Bot reconnected!");
+          });
+        }
+        ;
       }, 1000);
     })) as Snake;
   }

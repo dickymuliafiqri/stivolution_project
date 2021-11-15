@@ -98,6 +98,7 @@ modules.xml
 
 # Custom
 app/**/*
+db/
 
 lib-cov
 *.seed

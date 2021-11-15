@@ -148,6 +148,9 @@ bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
         } else if (data.match(/Restart/)) {
             await bot.snake.telegram.editMessage(chatId, ctx.msgId, message.text);
             await bot.snake.telegram.sendMessage(chatId, "Meng-compile kode...");
+
+            // Delete previous modules, recompile, and restart the bot
+            exec("rm -rf app/src/modules");
             spawn("npx", ["tsc"]).on("close", async () => {
                 await bot.snake.telegram
                     .sendMessage(chatId, "Memulai ulang bot...")
@@ -159,7 +162,7 @@ bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
             // Clean local repo before pulling from upstream
             await bot.git.clean("f", ["-d"]);
             await bot.git
-                .pull("origin", bot.branch)
+                .pull("origin", bot.branch.replace("origin/", ""))
                 .then((res) => {
                     finalText = `<b>Pembaruan ${bot.branch} berhasil</b>`;
                     finalText += "\n----------\n";
@@ -181,27 +184,27 @@ bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
           await bot.snake.telegram
             .sendMessage(chatId, finalText, {
               parseMode: "HTML",
-              replyToMsgId: replyToMessage.id,
-              replyMarkup: finalButton[0][0]
-                ? {
-                    inlineKeyboard: finalButton,
-                  }
-                : undefined,
+                replyToMsgId: replyToMessage.id,
+                replyMarkup: finalButton[0][0]
+                    ? {
+                        inlineKeyboard: finalButton
+                    }
+                    : undefined
             })
-            .then(() => {
-              finalText = "";
-            });
-        } else if (data.match(/ChangeBranch \w+/)) {
-          const selBranch: string = data.split(" ")[1];
-          bot.branch = selBranch;
+              .then(() => {
+                  finalText = "";
+              });
+        } else if (data.match(/ChangeBranch .+/)) {
+            const selBranch: string = data.split(" ")[1];
+            bot.branch = selBranch;
 
-          // Checkout branch
-          await bot.git.checkout(["-B", selBranch, "-f"]);
+            // Checkout branch
+            await bot.git.checkout(["-B", selBranch, "-f"]);
 
-          finalText = `Berhasil berganti branch ke ${selBranch}`;
-          let finalButton: Array<Array<inlineKeyboardButton>> = [
-            [
-              {
+            finalText = `Berhasil berganti branch ke ${selBranch}`;
+            let finalButton: Array<Array<inlineKeyboardButton>> = [
+                [
+                    {
                 text: "Update",
                 callbackData: "01/Update",
               },

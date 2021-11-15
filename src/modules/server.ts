@@ -130,10 +130,10 @@ bot.snake.command("restart", async (ctx) => {
     );
 });
 
-let desc: string = "Cek status dan keadaan bot\n";
+let desc: string = "Cek status dan keadaan bot/server\n";
 desc += "\n<code>/ping</code> -> Cek kecepatan respon";
 desc += "\n<code>/alive</code> -> Lihat informasi bot";
 desc += "\n<code>/speedtest</code> -> Uji kecepatan internet";
 desc += "\n<code>/restart</code> -> Mulai ulang bot";
 
-bot.addHelp("bot", desc);
+bot.addHelp("server", desc);
