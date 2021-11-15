@@ -29,7 +29,8 @@ bot.snake.on("message", async (ctx) => {
     "exec",
     "restart",
     "speedtest",
-    "branch"
+    "branch",
+    "up"
   ];
   const uploadPhoto: Array<string> = ["alive"];
 

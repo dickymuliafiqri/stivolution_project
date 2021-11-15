@@ -162,7 +162,7 @@ bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
             // Clean local repo before pulling from upstream
             await bot.git.clean("f", ["-d"]);
             await bot.git
-                .pull("origin", bot.branch.replace("origin/", ""))
+                .pull("origin", bot.branch)
                 .then((res) => {
                     finalText = `<b>Pembaruan ${bot.branch} berhasil</b>`;
                     finalText += "\n----------\n";
@@ -199,7 +199,7 @@ bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
             bot.branch = selBranch;
 
             // Checkout branch
-            await bot.git.checkout(["-B", selBranch, "-f"]);
+            await bot.git.checkout(["-B", selBranch]);
 
             finalText = `Berhasil berganti branch ke ${selBranch}`;
             let finalButton: Array<Array<inlineKeyboardButton>> = [

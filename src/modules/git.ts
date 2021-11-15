@@ -51,16 +51,16 @@ bot.snake.command("update", async (ctx) => {
     async () => {
         await bot.git.fetch(["origin"]);
         await bot.git.checkout(["-B", bot.branch]);
-      const status = await bot.git.status();
-      const updateCount: number = status.behind;
+        const status = await bot.git.status();
+        const updateCount: number = status.behind;
 
-      let finalText: string = "<b>Perbarui Stivolution</b>";
-      finalText += "\n----------\n";
+        let finalText: string = "<b>Perbarui Stivolution</b>";
+        finalText += "\n----------\n";
 
-      let finalButton: Array<Array<inlineKeyboardButton>> = [[]];
+        let finalButton: Array<Array<inlineKeyboardButton>> = [[]];
 
-      if (!updateCount) {
-        finalText +=
+        if (!updateCount) {
+            finalText +=
           "\nTidak ada pembaruan, kamu sedang menggunakan bot dengan versi terbaru!";
       } else {
         finalText += "\nPembaruan tersedia!";
@@ -106,7 +106,7 @@ bot.snake.command("update", async (ctx) => {
 bot.snake.hears(branchRegExp, async (ctx) => {
   bot.wrapper(
     async () => {
-        const branches = await bot.git.branch(["-r"]);
+        const branches = await bot.git.branch(["--list"]);
 
       let finalText: string = "<b>Daftar Branch</b>";
       finalText += "\n----------\n";
@@ -119,7 +119,7 @@ bot.snake.hears(branchRegExp, async (ctx) => {
           });
 
         finalText += `\n<b>${
-            branch.match(branches.current) ? branch + " 🟢" : branch
+            branch === branches.current ? branch + " 👈🏻" : branch
         }</b>`;
         commits.forEach((commit) => {
           finalText += `\n\t└<i>${commit?.message}</i>`;
@@ -141,7 +141,7 @@ bot.snake.hears(branchChangeRegExp, async (ctx) => {
         const match: any = ctx.text?.match(branchChangeRegExp);
         const selBranch: string = match[1];
 
-        const branches = await bot.git.branch(["-r"]);
+        const branches = await bot.git.branch(["--list"]);
         const allBranches: Array<string> = branches.all;
 
         if (!allBranches.includes(selBranch))
@@ -164,11 +164,11 @@ bot.snake.hears(branchChangeRegExp, async (ctx) => {
             ]
         ];
 
-      await ctx.replyWithHTML(finalText, {
-        replyMarkup: {
-          inlineKeyboard: finalButton,
-        },
-      });
+        await ctx.replyWithHTML(finalText, {
+            replyMarkup: {
+                inlineKeyboard: finalButton
+            }
+        });
     },
     {
       context: ctx,
