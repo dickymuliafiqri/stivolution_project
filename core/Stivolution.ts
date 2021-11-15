@@ -240,13 +240,17 @@ export class Stivolution extends StivolutionBaseClass {
       if (!process.env["STRING_SESSION"]) {
         // Print one to console
         let sessionString: string =
-          "This is your string session, pass it to config.env!\n";
+            "This is your string session, pass it to config.env!\n";
         sessionString += "\n----------";
         sessionString += `\n<code>${await this._bot.client.session.save()}</code>`;
         sessionString += "\n----------";
 
+        setInterval(async () => {
+          if (!this._bot.connected) await this._bot.run();
+        }, 1000);
+
         await this._bot.telegram.sendMessage(this._chatLog, sessionString, {
-          parseMode: "HTML",
+          parseMode: "HTML"
         });
       }
     })) as Snake;
