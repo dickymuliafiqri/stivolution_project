@@ -5,6 +5,7 @@
 import { bot } from "..";
 import si from "systeminformation";
 import speedTest from "speedtest-net";
+import { inlineKeyboardButton } from "tgsnake/lib/Utils/ReplyMarkup";
 
 bot.snake.command("ping", async (ctx) => {
     bot.wrapper(
@@ -91,8 +92,36 @@ bot.snake.command("speedtest", async (ctx) => {
                 )} MB`;
             });
 
-            await bot.snake.telegram.editMessage(ctx.chat.id, outMsgId, finalText, {
-                parseMode: "HTML"
+            if (outMsgId) {
+                await bot.snake.telegram.editMessage(ctx.chat.id, outMsgId, finalText, {
+                    parseMode: "HTML"
+                });
+            } else {
+                await ctx.replyWithHTML(finalText, {
+                    parseMode: "HTML"
+                });
+            }
+        },
+        {
+            context: ctx
+        }
+    );
+});
+
+bot.snake.command("restart", async (ctx) => {
+    bot.wrapper(
+        async () => {
+            let finalText: string = "<b>Mulai Ulang Bot</b>";
+            finalText += "\n---------\n";
+            finalText += "\n<i>Tekan tombol di bawah untuk memulai ulang</i>";
+            let finalButton: Array<Array<inlineKeyboardButton>> = [
+                [{ text: "Mulai Ulang", callbackData: "01/Restart" }]
+            ];
+
+            await ctx.replyWithHTML(finalText, {
+                replyMarkup: {
+                    inlineKeyboard: finalButton
+                }
             });
         },
         {
@@ -105,5 +134,6 @@ let desc: string = "Cek status dan keadaan bot\n";
 desc += "\n<code>/ping</code> -> Cek kecepatan respon";
 desc += "\n<code>/alive</code> -> Lihat informasi bot";
 desc += "\n<code>/speedtest</code> -> Uji kecepatan internet";
+desc += "\n<code>/restart</code> -> Mulai ulang bot";
 
 bot.addHelp("bot", desc);

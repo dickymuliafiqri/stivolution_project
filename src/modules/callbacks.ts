@@ -136,26 +136,27 @@ bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
             .then(() => {
               finalText = "Berhasil logout";
             })
-            .catch((err) => {
-              throw err;
-            })
-            .finally(() => {
-              sqlite3.close(db);
+              .catch((err) => {
+                  throw err;
+              })
+              .finally(() => {
+                  sqlite3.close(db);
+              });
+            await bot.snake.client.deleteMessages(chatId, [ctx.msgId], {
+                revoke: true
             });
-          await bot.snake.client.deleteMessages(chatId, [ctx.msgId], {
-            revoke: true,
-          });
-        } else if (data.match(/Restart$/)) {
-          await bot.snake.telegram.editMessage(chatId, ctx.msgId, message.text);
-          await bot.snake.telegram.sendMessage(chatId, "Memulai ulang bot...");
-          exec(`TO_REPORT_RESTART=${chatId}`);
-          exec("pm2 restart Stivolution");
+        } else if (data.match(/Restart/)) {
+            exec("npx tsc");
+            await bot.snake.telegram.editMessage(chatId, ctx.msgId, message.text);
+            await bot.snake.telegram.sendMessage(chatId, "Memulai ulang bot...");
+            exec(`TO_REPORT_RESTART=${chatId}`);
+            exec("pm2 restart Stivolution");
         } else if (data.match(/Update$/)) {
-          // Clean local repo before pulling from upstream
-          await bot.git.clean("f", ["-d"]);
-          await bot.git
-            .pull("origin", bot.branch, ["-X", "theirs"])
-            .then((res) => {
+            // Clean local repo before pulling from upstream
+            await bot.git.clean("f", ["-d"]);
+            await bot.git
+                .pull("origin", bot.branch, ["-X", "theirs"])
+                .then((res) => {
               finalText = "<b>Pembaruan berhasil</b>";
               finalText += "\n----------\n";
 
@@ -185,9 +186,6 @@ bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
             })
             .then(() => {
               finalText = "";
-            })
-            .finally(() => {
-              exec(`cd "${bot.projectDir}" && npx tsc`);
             });
         } else if (data.match(/ChangeBranch \w+/)) {
           const selBranch: string = data.split(" ")[1];
