@@ -149,7 +149,6 @@ bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
             exec("npx tsc");
             await bot.snake.telegram.editMessage(chatId, ctx.msgId, message.text);
             await bot.snake.telegram.sendMessage(chatId, "Memulai ulang bot...");
-            exec(`TO_REPORT_RESTART=${chatId}`);
             exec("pm2 restart Stivolution");
         } else if (data.match(/Update$/)) {
             // Clean local repo before pulling from upstream

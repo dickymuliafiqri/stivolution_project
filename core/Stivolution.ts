@@ -110,19 +110,24 @@ export class Stivolution extends StivolutionBaseClass {
             this._branch,
             "--track",
             `origin/${this._branch}`,
-            "-f",
+            "-f"
           ]);
         }
       });
 
+      /**
+       * TODO
+       *
+       * - Send this message
+       */
       const toReportRestart = Number(getEnv("TO_REPORT_RESTART", false) || 0);
       if (toReportRestart) {
         console.log("🐍 Successfully restart, sending report...");
         await this._bot.telegram
-          .sendMessage(toReportRestart, "Berhasil memulai ulang")
-          .then(() => {
-            exec("TO_REPORT_RESTART=0");
-          });
+            .sendMessage(toReportRestart, "Berhasil memulai ulang")
+            .then(() => {
+              exec("TO_REPORT_RESTART=0");
+            });
       }
 
       console.log("🐍 Sending botInfo to CHAT_LOG...");
