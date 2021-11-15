@@ -138,22 +138,21 @@ bot.snake.hears(branchRegExp, async (ctx) => {
 bot.snake.hears(branchChangeRegExp, async (ctx) => {
   bot.wrapper(
     async () => {
-      const match: any = ctx.text?.match(branchChangeRegExp);
-      const selBranch: string = match[1];
+        const match: any = ctx.text?.match(branchChangeRegExp);
+        const selBranch: string = match[1];
 
-      const branches = await bot.git.branch(["--list"]).then((res) => {
-        return res.all;
-      });
+        const branches = await bot.git.branch(["--list"]);
+        const allBranches: Array<string> = branches.all;
 
-      if (!branches.includes(selBranch))
-        return await ctx.replyWithHTML("Branch tidak ditemukan!");
-      if (bot.branch === selBranch)
-        return await ctx.replyWithHTML(
-          "Kamu sekarang sedang menggunakan branch tersebut!"
-        );
+        if (!allBranches.includes(selBranch))
+            return await ctx.replyWithHTML("Branch tidak ditemukan!");
+        if (bot.branch === selBranch)
+            return await ctx.replyWithHTML(
+                "Kamu sekarang sedang menggunakan branch tersebut!"
+            );
 
-      let finalText: string = "<b>Ganti Branch</b>";
-      finalText += "\n----------\n";
+        let finalText: string = "<b>Ganti Branch</b>";
+        finalText += "\n----------\n";
       finalText += `\nTekan tombol di bawah untuk berganti dari branch <b>${bot.branch}</b> ke <b>${selBranch}</b>`;
 
       let finalButton: Array<Array<inlineKeyboardButton>> = [

@@ -48,7 +48,7 @@ export class Stivolution extends StivolutionBaseClass {
 
     // Initialize error handler
     this._bot.catch(async (err, ctx) => {
-      const userId = ctx.from?.id || ctx.userId;
+      const userId = ctx?.from?.id || ctx?.userId;
       let context: string;
 
       // Stringify context
