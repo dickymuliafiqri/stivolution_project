@@ -163,6 +163,7 @@ export class Stivolution extends StivolutionBaseClass {
   }
 
   addHelp(name: string, description: string) {
+    if (this._helpList) console.error(`🐍 Description for ${name} is conflict with another module!`);
     this._helpList[name] = description;
   }
 

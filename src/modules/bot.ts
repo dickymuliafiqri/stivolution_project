@@ -4,7 +4,6 @@
 
 import { bot } from "..";
 import si from "systeminformation";
-import speedTest from "speedtest-net";
 import { inlineKeyboardButton } from "tgsnake/lib/Utils/ReplyMarkup";
 
 bot.snake.command("ping", async (ctx) => {
@@ -63,50 +62,6 @@ bot.snake.command("alive", async (ctx) => {
     );
 });
 
-bot.snake.command("speedtest", async (ctx) => {
-    bot.wrapper(
-        async () => {
-            const outMsgId: number = await ctx
-                .replyWithHTML("Memulai uji kecepatan!\n<i>harap tunggu...</i>")
-                .then((res) => {
-                    return res.id;
-                });
-
-            let finalText: string = "<b>Hasil Uji Kecepatan Internet</b>";
-            finalText += "\n----------\n";
-
-            await speedTest({
-                acceptGdpr: true,
-                acceptLicense: true
-            }).then((res) => {
-                finalText += `\n⎧-Server: ${res.server.name}`;
-                finalText += `\n⎪\t└Country: ${res.server.country}`;
-                finalText += `\n⎪\t└Location: ${res.server.location}`;
-                finalText += `\n⎪-ISP: ${res.isp}`;
-                finalText += `\n⎪\t└Ping: ${res.ping.latency} ms`;
-                finalText += `\n⎪\t  └Download: ${(
-                    res.download.bytes / 1000000
-                ).toFixed(2)} MB`;
-                finalText += `\n⎩\t  └Upload: ${(res.upload.bytes / 1000000).toFixed(
-                    2
-                )} MB`;
-            });
-
-            if (outMsgId) {
-                await bot.snake.telegram.editMessage(ctx.chat.id, outMsgId, finalText, {
-                    parseMode: "HTML"
-                });
-            } else {
-                await ctx.replyWithHTML(finalText, {
-                    parseMode: "HTML"
-                });
-            }
-        },
-        {
-            context: ctx
-        }
-    );
-});
 
 bot.snake.command("restart", async (ctx) => {
     bot.wrapper(
@@ -133,7 +88,6 @@ bot.snake.command("restart", async (ctx) => {
 let desc: string = "Cek status dan keadaan bot/server\n";
 desc += "\n<code>/ping</code> -> Cek kecepatan respon";
 desc += "\n<code>/alive</code> -> Lihat informasi bot";
-desc += "\n<code>/speedtest</code> -> Uji kecepatan internet";
 desc += "\n<code>/restart</code> -> Mulai ulang bot";
 
-bot.addHelp("server", desc);
+bot.addHelp("bot", desc);
