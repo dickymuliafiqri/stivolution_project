@@ -246,7 +246,8 @@ export class Stivolution extends StivolutionBaseClass {
         sessionString += "\n----------";
 
         setInterval(async () => {
-          if (!this._bot.connected) await this._bot.run();
+          console.log("Bot is " + this._bot.client.disconnected);
+          if (!this._bot.client.disconnected) await this._bot.client.connect();
         }, 1000);
 
         await this._bot.telegram.sendMessage(this._chatLog, sessionString, {

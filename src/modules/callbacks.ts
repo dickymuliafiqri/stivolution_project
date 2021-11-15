@@ -159,9 +159,9 @@ bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
             // Clean local repo before pulling from upstream
             await bot.git.clean("f", ["-d"]);
             await bot.git
-                .pull("origin", bot.branch, ["-X", "theirs"])
+                .pull("origin", bot.branch)
                 .then((res) => {
-                    finalText = "<b>Pembaruan berhasil</b>";
+                    finalText = `<b>Pembaruan ${bot.branch} berhasil</b>`;
                     finalText += "\n----------\n";
 
                     finalText += "\nRangkuman";
