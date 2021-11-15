@@ -9,7 +9,7 @@ import { inlineKeyboardButton } from "tgsnake/lib/Utils/ReplyMarkup";
 import { userDataList } from "../../core/Session";
 import { default as axios } from "axios";
 import { Api } from "telegram/tl";
-import { exec } from "child_process";
+import { exec, spawn } from "child_process";
 
 bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
   bot.wrapper(
@@ -127,44 +127,49 @@ bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
         } else if (data.match(/Logout$/)) {
           const db = await sqlite3.connect();
 
-          await new Promise((resolve, reject) => {
-            db?.run(`DELETE FROM Users WHERE UserID = ?`, [userId], (err) => {
-              if (err) reject(err);
-              else resolve("OK");
-            });
-          })
-            .then(() => {
-              finalText = "Berhasil logout";
+            await new Promise((resolve, reject) => {
+                db?.run(`DELETE FROM Users WHERE UserID = ?`, [userId], (err) => {
+                    if (err) reject(err);
+                    else resolve("OK");
+                });
             })
-              .catch((err) => {
-                  throw err;
-              })
-              .finally(() => {
-                  sqlite3.close(db);
-              });
+                .then(() => {
+                    finalText = "Berhasil logout";
+                })
+                .catch((err) => {
+                    throw err;
+                })
+                .finally(() => {
+                    sqlite3.close(db);
+                });
             await bot.snake.client.deleteMessages(chatId, [ctx.msgId], {
                 revoke: true
             });
         } else if (data.match(/Restart/)) {
-            exec("npx tsc");
             await bot.snake.telegram.editMessage(chatId, ctx.msgId, message.text);
-            await bot.snake.telegram.sendMessage(chatId, "Memulai ulang bot...");
-            exec("pm2 restart Stivolution");
+            await bot.snake.telegram.sendMessage(chatId, "Meng-compile kode...");
+            spawn("npx", ["tsc"]).on("close", async () => {
+                await bot.snake.telegram
+                    .sendMessage(chatId, "Memulai ulang bot...")
+                    .then(() => {
+                        exec("pm2 restart Stivolution");
+                    });
+            });
         } else if (data.match(/Update$/)) {
             // Clean local repo before pulling from upstream
             await bot.git.clean("f", ["-d"]);
             await bot.git
                 .pull("origin", bot.branch, ["-X", "theirs"])
                 .then((res) => {
-              finalText = "<b>Pembaruan berhasil</b>";
-              finalText += "\n----------\n";
+                    finalText = "<b>Pembaruan berhasil</b>";
+                    finalText += "\n----------\n";
 
-              finalText += "\nRangkuman";
-              finalText += `\n- Perubahan: ${res.summary.changes}`;
-              finalText += `\n- Penghapusan: ${res.summary.deletions}`;
-              finalText += `\n- Penambahan: ${res.summary.insertions}`;
-              finalText +=
-                "\n\n<i>Tekan tombol di bawah untuk memulai ulang</i>";
+                    finalText += "\nRangkuman";
+                    finalText += `\n- Perubahan: ${res.summary.changes}`;
+                    finalText += `\n- Penghapusan: ${res.summary.deletions}`;
+                    finalText += `\n- Penambahan: ${res.summary.insertions}`;
+                    finalText +=
+                        "\n\n<i>Tekan tombol di bawah untuk memulai ulang</i>";
 
               finalButton[0][0] = {
                 text: "Mulai Ulang",
