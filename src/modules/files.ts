@@ -43,7 +43,7 @@ bot.snake.hears(upRegExp, async (ctx) => {
 
             let finalText: string = `<b>Mengunggah Berkas</b>`;
             finalText += "\n----------\n";
-            finalText += `\nFile: <code>${match[1].split("/").at(-1)}</code>`;
+            finalText += `\nName: <code>${match[1].split("/").at(-1)}</code>`;
 
             await ctx
                 .replyWithHTML(`${finalText}\n${progressText(0)}`)
@@ -58,23 +58,16 @@ bot.snake.hears(upRegExp, async (ctx) => {
                 caption: finalText,
                 parseMode: "html",
                 progressCallback: async (progress) => {
-                    if (Number(progress.toFixed())) {
-                        await bot.snake.telegram.deleteMessage(ctx.chat.id, outMsg.id);
-                    } else {
-                        await bot.snake.telegram
-                            .editMessage(
-                                ctx.chat.id,
-                                outMsg.id,
-                                `${finalText}\n${progressText(progress)}`,
-                                {
-                                    parseMode: "html",
-                                    noWebpage: true
-                                }
-                            )
-                            .catch((err) => {
-                                if (!err.message.match("MESSAGE_NOT_MODIFIED")) throw err;
-                            });
-                    }
+                    await bot.snake.telegram
+                        .editMessage(
+                            ctx.chat.id,
+                            outMsg.id,
+                            `${finalText}\n${progressText(progress)}`,
+                            {
+                                parseMode: "html",
+                                noWebpage: true
+                            }
+                        );
                 }
             });
         },

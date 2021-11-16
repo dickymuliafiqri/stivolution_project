@@ -122,8 +122,8 @@ public/css/main.css
 coverage
 
 # API keys and secrets
-!sample-*.env
-config.env
+!sample_*.env
+*.env
 
 # Dependency directory
 node_modules

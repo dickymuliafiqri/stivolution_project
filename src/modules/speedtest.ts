@@ -30,9 +30,9 @@ bot.snake.command("speedtest", async (ctx) => {
                 finalText += `\n⎪-ISP: ${res.isp}`;
                 finalText += `\n⎪\t└Ping: ${res.ping.latency} ms`;
                 finalText += `\n⎪\t  └Download: ${(
-                    res.download.bytes / 1000000
+                    res.download.bandwidth / 100000
                 ).toFixed(2)} MB`;
-                finalText += `\n⎪\t  └Upload: ${(res.upload.bytes / 1000000).toFixed(
+                finalText += `\n⎪\t  └Upload: ${(res.upload.bandwidth / 100000).toFixed(
                     2
                 )} MB`;
                 finalText += `\n⎩-Result: <a href="${res.result.url}">URL</a>`;
