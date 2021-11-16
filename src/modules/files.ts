@@ -30,7 +30,7 @@ bot.snake.hears(upRegExp, async (ctx) => {
         async () => {
             const match: any = ctx.text?.match(upRegExp);
             const filePath: string = `${bot.projectDir}/${match[1]}`;
-            let progressMsgId: number;
+            let outMsg: any;
 
             // Filter
             if (!existsSync(filePath))
@@ -43,26 +43,25 @@ bot.snake.hears(upRegExp, async (ctx) => {
             finalText += "\n----------\n";
             finalText += `\nFile: <code>${match[1].split("/").at(-1)}</code>`;
 
+            await ctx
+                .replyWithHTML(`${finalText}\n${progressText(0)}`)
+                .then((res) => {
+                    outMsg = res.message || res;
+                });
+
             await bot.snake.client.sendFile(ctx.chat.id, {
                 file: filePath,
                 replyTo: ctx.id,
                 progressCallback: async (progress) => {
-                    if (!progressMsgId) {
-                        await ctx
-                            .replyWithHTML(`${finalText}\n${progressText(progress)}`)
-                            .then((res) => {
-                                progressMsgId = res.id;
-                            });
-                    } else {
-                        await bot.snake.telegram.editMessage(
-                            ctx.chat.id,
-                            progressMsgId,
-                            `${finalText}\n${progressText(progress)}`,
-                            {
-                                parseMode: "HTML"
-                            }
-                        );
-                    }
+                    await bot.snake.telegram.editMessage(
+                        ctx.chat.id,
+                        outMsg.id,
+                        `${finalText}\n${progressText(progress)}`,
+                        {
+                            parseMode: "HTML",
+                            noWebpage: true
+                        }
+                    );
                 }
             });
         },

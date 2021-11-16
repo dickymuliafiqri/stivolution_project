@@ -48,7 +48,7 @@ export class Stivolution extends StivolutionBaseClass {
 
     // Initialize error handler
     this._bot.catch(async (err, ctx) => {
-      const userId = ctx?.from?.id || ctx?.userId;
+      const chatId = ctx?.chat?.id || ctx?.userId;
       let context: string;
 
       // Stringify context
@@ -72,10 +72,10 @@ export class Stivolution extends StivolutionBaseClass {
         }
       );
 
-      if (userId)
+      if (chatId)
         await this._bot.telegram.sendMessage(
-          userId,
-          `Terjadi kesalahan, laporan telah dikirimkan ke tim pengembang\n\n${err.message}`
+            chatId,
+            `Terjadi kesalahan, laporan telah dikirimkan ke tim pengembang\n\n${err.message}`
         );
     });
 
@@ -103,15 +103,11 @@ export class Stivolution extends StivolutionBaseClass {
 
           await this._git
               .init()
-              .addRemote("origin", this.__url__, ["-t", this._branch]);
+              .addRemote("origin", this.__url__);
           await this._git.fetch("origin");
-          await this._git.checkout([
-            "-B",
-            this._branch,
-            "--track",
-            `origin/${this._branch}`,
-            "-f"
-          ]);
+          await this._git.branch(["--track", "main", "origin/main"]);
+          await this._git.branch(["--track", "beta", "origin/beta"]);
+          await this._git.checkout(["-B", this._branch, "-f"]);
         }
       });
 
@@ -163,7 +159,7 @@ export class Stivolution extends StivolutionBaseClass {
   }
 
   addHelp(name: string, description: string) {
-    if (this._helpList) console.error(`🐍 Description for ${name} is conflict with another module!`);
+    if (this._helpList[name]) console.error(`🐍 Description for ${name} is conflict with another module!`);
     this._helpList[name] = description;
   }
 
@@ -253,6 +249,7 @@ export class Stivolution extends StivolutionBaseClass {
 
       // Configure client
       this._bot.client.floodSleepThreshold = 0;
+      this._bot.client.setParseMode("html");
 
       // Try to reconnect client when it disconnected
       setInterval(async () => {

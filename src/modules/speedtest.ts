@@ -10,14 +10,15 @@ import speedTest from "speedtest-net";
 bot.snake.command("speedtest", async (ctx) => {
     bot.wrapper(
         async () => {
-            const outMsgId: number = await ctx
-                .replyWithHTML("Memulai uji kecepatan!\n<i>harap tunggu...</i>")
-                .then((res) => {
-                    return res.id;
-                });
-
+            let outMsg: any;
             let finalText: string = "<b>Hasil Uji Kecepatan Internet</b>";
             finalText += "\n----------\n";
+
+            await ctx
+                .replyWithHTML("Memulai uji kecepatan!\n<i>harap tunggu...</i>")
+                .then(async (res) => {
+                    outMsg = res.message || res;
+                });
 
             await speedTest({
                 acceptGdpr: true,
@@ -37,15 +38,11 @@ bot.snake.command("speedtest", async (ctx) => {
                 finalText += `\n⎩-Result: <a href="${res.result.url}">URL</a>`;
             });
 
-            if (outMsgId) {
-                await bot.snake.telegram.editMessage(ctx.chat.id, outMsgId, finalText, {
-                    parseMode: "HTML"
-                });
-            } else {
-                await ctx.replyWithHTML(finalText, {
-                    parseMode: "HTML"
-                });
-            }
+            // Send result
+            await bot.snake.telegram.editMessage(ctx.chat.id, outMsg.id, finalText, {
+                noWebpage: true,
+                parseMode: "HTML"
+            });
         },
         {
             context: ctx
