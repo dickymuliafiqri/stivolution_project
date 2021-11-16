@@ -56,7 +56,7 @@ bot.snake.hears(upRegExp, async (ctx) => {
                 replyTo: ctx.id,
                 forceDocument: true,
                 caption: finalText,
-                parseMode: "HTML",
+                parseMode: "html",
                 progressCallback: async (progress) => {
                     if (Number(progress.toFixed())) {
                         await bot.snake.telegram.deleteMessage(ctx.chat.id, outMsg.id);
@@ -67,7 +67,7 @@ bot.snake.hears(upRegExp, async (ctx) => {
                                 outMsg.id,
                                 `${finalText}\n${progressText(progress)}`,
                                 {
-                                    parseMode: "HTML",
+                                    parseMode: "html",
                                     noWebpage: true
                                 }
                             )
