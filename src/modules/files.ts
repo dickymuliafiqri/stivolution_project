@@ -22,7 +22,9 @@ let progressText = (progress: number) => {
             bar += "•";
         }
     }
-    return `Progress: [${progressBar >= 10 ? "FINISH" : bar}] ${progress * 100}%`;
+    return `Progress: [${progressBar >= 10 ? "FINISH" : bar}] ${(
+        progress * 100
+    ).toFixed(2)}%`;
 };
 
 bot.snake.hears(upRegExp, async (ctx) => {
@@ -52,16 +54,27 @@ bot.snake.hears(upRegExp, async (ctx) => {
             await bot.snake.client.sendFile(ctx.chat.id, {
                 file: filePath,
                 replyTo: ctx.id,
+                forceDocument: true,
+                caption: finalText,
+                parseMode: "HTML",
                 progressCallback: async (progress) => {
-                    await bot.snake.telegram.editMessage(
-                        ctx.chat.id,
-                        outMsg.id,
-                        `${finalText}\n${progressText(progress)}`,
-                        {
-                            parseMode: "HTML",
-                            noWebpage: true
-                        }
-                    );
+                    if (Number(progress.toFixed())) {
+                        await bot.snake.telegram.deleteMessage(ctx.chat.id, outMsg.id);
+                    } else {
+                        await bot.snake.telegram
+                            .editMessage(
+                                ctx.chat.id,
+                                outMsg.id,
+                                `${finalText}\n${progressText(progress)}`,
+                                {
+                                    parseMode: "HTML",
+                                    noWebpage: true
+                                }
+                            )
+                            .catch((err) => {
+                                if (!err.message.match("MESSAGE_NOT_MODIFIED")) throw err;
+                            });
+                    }
                 }
             });
         },
