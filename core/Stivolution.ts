@@ -11,12 +11,16 @@ import { getEnv } from "../src/utils/Utilities";
 import { userDataList } from "./Session";
 import { MessageContext } from "tgsnake/lib/Context/MessageContext";
 import simpleGit, { SimpleGit } from "simple-git";
-import { existsSync } from "fs";
-import { exec } from "child_process";
+import { existsSync, writeFileSync } from "fs";
 
 interface WrapperOptionsInterface {
   context: MessageContext | any;
   skipSessionCheck?: boolean;
+}
+
+interface IgnoreErrorTextInterface {
+  trigger?: string | RegExp,
+  errorMessage: string
 }
 
 interface HelpInterface {
@@ -48,8 +52,25 @@ export class Stivolution extends StivolutionBaseClass {
 
     // Initialize error handler
     this._bot.catch(async (err, ctx) => {
-      const userId = ctx?.from?.id || ctx?.userId;
+      const chatId = ctx?.chat?.id || ctx?.userId;
+      const trigger: string = String(ctx?.text || ctx?.data?.toString());
       let context: string;
+
+      // Ignore error
+      /**
+       * TODO
+       *
+       * We use this guy for now
+       * Need to find the better way to ignore errors
+       */
+      const ignoreErrorText: Array<IgnoreErrorTextInterface> = [
+        {
+          errorMessage: "MESSAGE_NOT_MODIFIED"
+        }
+      ];
+      for (const ignoredError of ignoreErrorText) {
+        if (err?.message?.match(ignoredError.errorMessage)) return;
+      }
 
       // Stringify context
       try {
@@ -72,10 +93,10 @@ export class Stivolution extends StivolutionBaseClass {
         }
       );
 
-      if (userId)
+      if (chatId)
         await this._bot.telegram.sendMessage(
-          userId,
-          `Terjadi kesalahan, laporan telah dikirimkan ke tim pengembang\n\n${err.message}`
+            chatId,
+            `Terjadi kesalahan, laporan telah dikirimkan ke tim pengembang\n\n${err.message}`
         );
     });
 
@@ -101,17 +122,12 @@ export class Stivolution extends StivolutionBaseClass {
         if (!isRepo) {
           console.log("🐍 Configuring repository upstream...");
 
-          await this._git
-              .init()
-              .addRemote("origin", this.__url__, ["-t", this._branch]);
+          await this._git.init().addRemote("origin", this.__url__);
           await this._git.fetch("origin");
-          await this._git.checkout([
-            "-B",
-            this._branch,
-            "--track",
-            `origin/${this._branch}`,
-            "-f"
-          ]);
+          await this._git.branch(["--track", "main", "origin/main"]);
+          await this._git.branch(["--track", "beta", "origin/beta"]);
+          await this._git.checkout(["-B", this._branch, "-f"]);
+          await this._git.reset(["--hard", `origin/${this._branch}`]);
         }
       });
 
@@ -120,13 +136,19 @@ export class Stivolution extends StivolutionBaseClass {
        *
        * - Send this message
        */
-      const toReportRestart = Number(getEnv("TO_REPORT_RESTART", false) || 0);
-      if (toReportRestart) {
+      let restartId: any = (getEnv("RESTART_ID", false) || "");
+      if (restartId) {
         console.log("🐍 Successfully restart, sending report...");
+
+        restartId = restartId.split("::");
+        const chatId: number = Number(restartId[0]);
+        const msgId: number = Number(restartId[1]);
         await this._bot.telegram
-            .sendMessage(toReportRestart, "Berhasil memulai ulang")
+            .editMessage(chatId, msgId, "Bot restarted!")
             .then(() => {
-              exec("TO_REPORT_RESTART=0");
+              writeFileSync(`${this.projectDir}/temp.env`, "RESTART_ID=''", {
+                flag: "w+"
+              });
             });
       }
 
@@ -163,6 +185,10 @@ export class Stivolution extends StivolutionBaseClass {
   }
 
   addHelp(name: string, description: string) {
+    if (this._helpList[name])
+      console.error(
+          `🐍 Description for ${name} is conflict with another module!`
+      );
     this._helpList[name] = description;
   }
 
@@ -246,21 +272,24 @@ export class Stivolution extends StivolutionBaseClass {
         sessionString += "\n----------";
 
         await this._bot.telegram.sendMessage(this._chatLog, sessionString, {
-          parseMode: "HTML"
+          parseMode: "html"
         });
       }
 
       // Configure client
-      this._bot.client.floodSleepThreshold = 0;
+      this._bot.client.floodSleepThreshold = 10;
+      this._bot.client.setParseMode("html");
 
       // Try to reconnect client when it disconnected
       setInterval(async () => {
         if (!this._bot.client._sender?._userConnected) {
           await this._bot.client.connect().then(async () => {
-            await this._bot.telegram.sendMessage(this._chatLog, "Bot reconnected!");
+            await this._bot.telegram.sendMessage(
+                this._chatLog,
+                "Bot reconnected!"
+            );
           });
         }
-        ;
       }, 1000);
     })) as Snake;
   }

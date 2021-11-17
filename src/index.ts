@@ -19,12 +19,17 @@ import { initDB, sqlite3 } from "./db";
 import { config } from "dotenv";
 import { existsSync } from "fs";
 
+const envFile = ["config.env", "temp.env"];
+
 // Load environment if file exists
-if (existsSync(`${process.cwd()}/config.env`)) {
-  config({
-    path: `${process.cwd()}/config.env`,
-  });
-}
+envFile.forEach(file => {
+  const filePath: string = `${process.cwd()}/${file}`;
+  if (existsSync(filePath)) {
+    config({
+      path: filePath
+    });
+  }
+});
 
 const bot = new Stivolution();
 

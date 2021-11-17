@@ -49,7 +49,7 @@ bot.snake.command("cl", async (ctx) => {
 bot.snake.command("update", async (ctx) => {
   bot.wrapper(
     async () => {
-        await bot.git.fetch(["origin"]);
+        await bot.git.fetch("origin");
         await bot.git.checkout(["-B", bot.branch]);
         const status = await bot.git.status();
         const updateCount: number = status.behind;
@@ -61,16 +61,16 @@ bot.snake.command("update", async (ctx) => {
 
         if (!updateCount) {
             finalText +=
-          "\nTidak ada pembaruan, kamu sedang menggunakan bot dengan versi terbaru!";
-      } else {
-        finalText += "\nPembaruan tersedia!";
+                "\nTidak ada pembaruan, kamu sedang menggunakan bot dengan versi terbaru!";
+        } else {
+            finalText += "\nPembaruan tersedia!";
 
-        const update = await bot.git.log([
-          "--max-count",
-          String(updateCount),
-          `origin/${bot.branch}`,
-        ]);
-        update.all.forEach((commit) => {
+            const update = await bot.git.log([
+                "--max-count",
+                String(updateCount),
+                `origin/${bot.branch}`
+            ]);
+            update.all.forEach((commit) => {
           finalText += `\n- ${
             commit.message.length > 25
               ? commit.message.substr(0, 25) + "..."
@@ -106,21 +106,27 @@ bot.snake.command("update", async (ctx) => {
 bot.snake.hears(branchRegExp, async (ctx) => {
   bot.wrapper(
     async () => {
-        const branches = await bot.git.branch(["-r"]);
+        await bot.git.fetch("origin");
+        const branches = await bot.git.branch(["--list"]);
 
-      let finalText: string = "<b>Daftar Branch</b>";
-      finalText += "\n----------\n";
+        let finalText: string = "<b>Daftar Branch</b>";
+        finalText += "\n----------\n";
 
-      for (const branch of branches.all) {
-        const commits = await bot.git
-            .log(["--max-count", "3", branch])
-          .then((res) => {
-            return res.all;
-          });
+        /**
+         * TODO
+         *
+         * - Add indicator when branch is outdated
+         */
+        for (const branch of branches.all) {
+            const commits = await bot.git
+                .log(["--max-count", "3", `origin/${branch}`])
+                .then((res) => {
+                    return res.all;
+                });
 
-        finalText += `\n<b>${
-            branch.match(branches.current) ? branch + " 🟢" : branch
-        }</b>`;
+            finalText += `\n<b>${
+                branch === branches.current ? branch + " 👈🏻" : branch
+            }</b>`;
         commits.forEach((commit) => {
           finalText += `\n\t└<i>${commit?.message}</i>`;
           finalText += `\n\t  └<i>${commit?.date}</i>`;
@@ -141,7 +147,7 @@ bot.snake.hears(branchChangeRegExp, async (ctx) => {
         const match: any = ctx.text?.match(branchChangeRegExp);
         const selBranch: string = match[1];
 
-        const branches = await bot.git.branch(["-r"]);
+        const branches = await bot.git.branch(["--list"]);
         const allBranches: Array<string> = branches.all;
 
         if (!allBranches.includes(selBranch))
