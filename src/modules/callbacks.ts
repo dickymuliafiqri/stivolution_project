@@ -16,6 +16,7 @@ bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
     let entities;
     let data;
     let userId: any;
+    let uChatId: any;
     let chatId: any;
     let outMsg: any;
     bot.wrapper(
@@ -24,8 +25,9 @@ bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
             entities = Object.fromEntries(ctx._entities);
             data = ctx.data?.toString() as string;
             userId = ctx.userId;
-            chatId = entities[Object.keys(entities).at(-1) || userId].id;
 
+            uChatId = Object.keys(entities).at(-1);
+            chatId = entities[uChatId || userId]?.id;
             let finalText: string = "";
             let finalButton: Array<Array<inlineKeyboardButton>> = [[]];
 
@@ -155,7 +157,7 @@ bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
             // Write temp.env
             await writeFile(
                 `${bot.projectDir}/temp.env`,
-                `RESTART_ID=${chatId}::${ctx.msgId}`,
+                `RESTART_ID=${uChatId}::${ctx.msgId}`,
                 {
                     flag: "w+"
                 }
@@ -223,7 +225,7 @@ bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
                     "Failed pull origin\n" + err.message
                 );
                 if (err.message.match("Auto-merging")) {
-                    await bot.snake.telegram.sendMessage(chatId, "Try to reset");
+                    await bot.snake.telegram.sendMessage(chatId, "Pull failed, try to hard reset...");
                     await bot.git.reset(["--hard", bot.branch]);
                     await pull();
                 } else {

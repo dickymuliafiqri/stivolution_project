@@ -15,14 +15,14 @@ let progressText = (progress: number) => {
     let bar: string = "";
     for (let i = 0; i < 10; i++) {
         if (i < progressBar) {
-            bar += "∙";
+            bar += "-";
         } else if (i === progressBar) {
             bar += progressBar % 2 ? "c" : "C";
         } else {
-            bar += "•";
+            bar += i % 2 ? " " : "▪︎";
         }
     }
-    return `Progress: [${progressBar >= 10 ? "FINISH" : bar}] ${(
+    return `Progress: [${progressBar >= 10 ? "<b>FINISH</b>" : bar}] ${(
         progress * 100
     ).toFixed(2)}%`;
 };
