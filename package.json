@@ -1,6 +1,6 @@
 {
   "name": "stivolution_project",
-  "version": "0.0.3-sngsem.5",
+  "version": "0.0.3-sngsem.6",
   "description": "Projek integrasi database stikom dengan telegram bot",
   "main": "app/index.js",
   "scripts": {

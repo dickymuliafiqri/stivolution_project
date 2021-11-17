@@ -19,7 +19,7 @@ let progressText = (progress: number) => {
         } else if (i === progressBar) {
             bar += progressBar % 2 ? "c" : "C";
         } else {
-            bar += i % 2 ? " " : "▪︎";
+            bar += i % 2 ? " " : "•";
         }
     }
     return `Progress: [${progressBar >= 10 ? "<b>FINISH</b>" : bar}] ${(
@@ -45,31 +45,42 @@ bot.snake.hears(upRegExp, async (ctx) => {
             finalText += "\n----------\n";
             finalText += `\nName: <code>${match[1].split("/").at(-1)}</code>`;
 
+            let editMsg: boolean = true;
+            setInterval(() => {
+                if (!editMsg) editMsg = true;
+            }, 7000);
+
             await ctx
                 .replyWithHTML(`${finalText}\n${progressText(0)}`)
                 .then((res) => {
                     outMsg = res.message || res;
                 });
 
-            await bot.snake.client.sendFile(ctx.chat.id, {
-                file: filePath,
-                replyTo: ctx.id,
-                forceDocument: true,
-                caption: finalText,
-                parseMode: "html",
-                progressCallback: async (progress) => {
-                    await bot.snake.telegram
-                        .editMessage(
-                            ctx.chat.id,
-                            outMsg.id,
-                            `${finalText}\n${progressText(progress)}`,
-                            {
-                                parseMode: "html",
-                                noWebpage: true
-                            }
-                        );
-                }
-            });
+            await bot.snake.client
+                .sendFile(ctx.chat.id, {
+                    file: filePath,
+                    replyTo: ctx.id,
+                    forceDocument: true,
+                    caption: finalText,
+                    parseMode: "html",
+                    progressCallback: async (progress) => {
+                        if (editMsg) {
+                            editMsg = false;
+                            await bot.snake.telegram.editMessage(
+                                ctx.chat.id,
+                                outMsg.id,
+                                `${finalText}\n${progressText(progress)}`,
+                                {
+                                    parseMode: "html",
+                                    noWebpage: true
+                                }
+                            );
+                        }
+                    }
+                })
+                .then(async () => {
+                    await bot.snake.telegram.deleteMessage(ctx.chat.id, [outMsg.id]);
+                });
         },
         {
             context: ctx
