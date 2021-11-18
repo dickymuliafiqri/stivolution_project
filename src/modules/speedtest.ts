@@ -24,7 +24,8 @@ bot.snake.command("speedtest", async (ctx) => {
                 acceptGdpr: true,
                 acceptLicense: true
             }).then((res) => {
-                finalText += `\n⎧-Server: ${res.server.name}`;
+                finalText += "\n⎧";
+                finalText += `\n⎪-Server: ${res.server.name}`;
                 finalText += `\n⎪\t└Country: ${res.server.country}`;
                 finalText += `\n⎪\t└Location: ${res.server.location}`;
                 finalText += `\n⎪-ISP: ${res.isp}`;
@@ -35,7 +36,8 @@ bot.snake.command("speedtest", async (ctx) => {
                 finalText += `\n⎪\t  └Upload: ${(res.upload.bandwidth / 100000).toFixed(
                     2
                 )} MB`;
-                finalText += `\n⎩-Result: <a href="${res.result.url}">URL</a>`;
+                finalText += `\n⎪-Result: <a href="${res.result.url}">URL</a>`;
+                finalText += "\n⎩";
             });
 
             // Send result

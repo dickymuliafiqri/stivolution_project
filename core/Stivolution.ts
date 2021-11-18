@@ -284,7 +284,7 @@ export class Stivolution extends StivolutionBaseClass {
       }
 
       // Configure client
-      this._bot.client.floodSleepThreshold = 10;
+      this._bot.client.floodSleepThreshold = 60;
       this._bot.client.setParseMode("html");
 
       // Try to reconnect client when it disconnected
