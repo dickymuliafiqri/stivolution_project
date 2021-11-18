@@ -225,7 +225,7 @@ bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
                     "Failed pull origin\n" + err.message
                 );
                 if (err.message.match("Auto-merging")) {
-                    await bot.snake.telegram.sendMessage(chatId, "Pull failed, try to hard reset...");
+                    await bot.snake.telegram.sendMessage(chatId, "Try to hard reset...");
                     await bot.git.reset(["--hard", bot.branch]);
                     await pull();
                 } else {
@@ -253,13 +253,14 @@ bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
 
             // Checkout branch
             await bot.git.checkout(["-B", selBranch]);
+            await bot.git.reset(["--hard", `origin/${selBranch}`]);
 
             finalText = `Berhasil berganti branch ke ${selBranch}`;
             let finalButton: Array<Array<inlineKeyboardButton>> = [
                 [
                     {
-                        text: "Update",
-                        callbackData: "01/Update"
+                        text: "Restart",
+                        callbackData: "01/Restart"
                     }
                 ]
             ];
@@ -267,7 +268,7 @@ bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
             await bot.snake.telegram.editMessage(
                 chatId,
                 ctx.msgId,
-                finalText + "\n\n<i>Lakukan update untuk menerapkan branch</i>",
+                finalText + "\n\n<i>Silahkan mulai ulang untuk menerapkan branch</i>",
                 {
                     parseMode: "HTML",
                     replyMarkup: {
