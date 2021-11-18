@@ -49,8 +49,7 @@ bot.snake.command("cl", async (ctx) => {
 bot.snake.command("update", async (ctx) => {
   bot.wrapper(
     async () => {
-        await bot.git.fetch("origin");
-        await bot.git.checkout(["-B", bot.branch]);
+        await bot.git.fetch("origin", bot.branch);
         const status = await bot.git.status();
         const updateCount: number = status.behind;
 

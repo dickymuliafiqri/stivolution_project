@@ -19,8 +19,8 @@ interface WrapperOptionsInterface {
 }
 
 interface IgnoreErrorTextInterface {
-  trigger?: string | RegExp,
-  errorMessage: string
+  trigger?: string | RegExp;
+  errorMessage: string;
 }
 
 interface HelpInterface {
@@ -128,6 +128,13 @@ export class Stivolution extends StivolutionBaseClass {
           await this._git.branch(["--track", "beta", "origin/beta"]);
           await this._git.checkout(["-B", this._branch, "-f"]);
           await this._git.reset(["--hard", `origin/${this._branch}`]);
+
+          // Configure github email and username
+          await this._git.addConfig("user.name", "stivolution");
+          await this._git.addConfig(
+              "user.email",
+              "stivolution@users.noreply.github.com"
+          );
         }
       });
 
@@ -136,7 +143,7 @@ export class Stivolution extends StivolutionBaseClass {
        *
        * - Send this message
        */
-      let restartId: any = (getEnv("RESTART_ID", false) || "");
+      let restartId: any = getEnv("RESTART_ID", false) || "";
       if (restartId) {
         console.log("🐍 Successfully restart, sending report...");
 
