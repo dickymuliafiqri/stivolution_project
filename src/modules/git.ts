@@ -70,16 +70,16 @@ bot.snake.command("update", async (ctx) => {
                 `origin/${bot.branch}`
             ]);
             update.all.forEach((commit) => {
-          finalText += `\n- ${
-            commit.message.length > 25
-              ? commit.message.substr(0, 25) + "..."
-              : commit.message
-          }`;
-          finalText += `\n\t└<i>${commit.author_name}</i>`;
-          finalText += `\n\t└<i>${commit.date}</i>\n`;
-        });
+                finalText += `\n- ${
+                    commit.message.length > 25
+                        ? commit.message.substr(0, 25) + "..."
+                        : commit.message
+                }`;
+                finalText += `\n\t└<i>${commit.author_name}</i>`;
+                finalText += `\n\t└<i>${commit.date}</i>\n`;
+            });
 
-        finalButton[0][0] = {
+            finalButton[0][0] = {
           text: "Update",
           callbackData: "01/Update",
         };
@@ -96,9 +96,10 @@ bot.snake.command("update", async (ctx) => {
           : undefined,
       });
     },
-    {
-      context: ctx,
-    }
+      {
+          context: ctx,
+          adminOnly: true
+      }
   );
 });
 
@@ -126,11 +127,11 @@ bot.snake.hears(branchRegExp, async (ctx) => {
             finalText += `\n<b>${
                 branch === branches.current ? branch + " 👈🏻" : branch
             }</b>`;
-        commits.forEach((commit) => {
-          finalText += `\n\t└<i>${commit?.message}</i>`;
-          finalText += `\n\t  └<i>${commit?.date}</i>`;
-        });
-      }
+            commits.forEach((commit) => {
+                finalText += `\n\t└<i>${commit?.message}</i>`;
+                finalText += `\n\t  └<i>${commit?.date}</i>`;
+            });
+        }
 
       await ctx.replyWithHTML(finalText);
     },
@@ -175,9 +176,10 @@ bot.snake.hears(branchChangeRegExp, async (ctx) => {
             }
         });
     },
-    {
-      context: ctx,
-    }
+      {
+          context: ctx,
+          adminOnly: true
+      }
   );
 });
 

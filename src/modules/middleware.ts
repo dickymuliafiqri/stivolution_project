@@ -7,6 +7,9 @@
 import { bot } from "..";
 import { Api } from "telegram/tl";
 
+// RegExp
+const commandPrefix: RegExp = /^[\/!.]/;
+
 bot.snake.use(async (ctx, next) => {
   ctx.startTime = Date.now();
   ctx.Date = new Date().toLocaleString();
@@ -15,7 +18,7 @@ bot.snake.use(async (ctx, next) => {
 });
 
 // Send chat actions
-bot.snake.on("message", async (ctx) => {
+bot.snake.hears(commandPrefix, async (ctx) => {
   const typing: Array<string> = [
     "start",
     "about",

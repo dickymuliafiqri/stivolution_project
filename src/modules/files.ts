@@ -83,7 +83,8 @@ bot.snake.hears(upRegExp, async (ctx) => {
                 });
         },
         {
-            context: ctx
+            context: ctx,
+            adminOnly: true
         }
     );
 });

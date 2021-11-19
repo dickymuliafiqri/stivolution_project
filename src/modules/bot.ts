@@ -62,7 +62,6 @@ bot.snake.command("alive", async (ctx) => {
     );
 });
 
-
 bot.snake.command("restart", async (ctx) => {
     bot.wrapper(
         async () => {
@@ -80,7 +79,8 @@ bot.snake.command("restart", async (ctx) => {
             });
         },
         {
-            context: ctx
+            context: ctx,
+            adminOnly: true
         }
     );
 });
