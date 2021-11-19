@@ -1,10 +1,11 @@
 # stivolution_project
 
-Projek integrasi database stikom dengan telegram bot
-
 <div align="center">
 
-![WithLove](https://shields.io/static/v1?label=Built%20with&message=♥&color=red&style=for-the-badge)  
+<img src="docs/logos/S_NoBox.png" alt="S Logo" width="250" height="250" title="Logo">
+
+Projek integrasi database stikom dengan telegram bot
+
 ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 ![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white)
