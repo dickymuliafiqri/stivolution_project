@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img src="docs/logos/S_NoBox.png" alt="S Logo" width="500" height="500" title="Logo">
+<img src="docs/logos/S_NoBox.png" alt="S Logo" width="250" height="250" title="Logo">
 
 Projek integrasi database stikom dengan telegram bot
 
