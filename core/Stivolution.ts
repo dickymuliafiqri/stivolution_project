@@ -48,6 +48,7 @@ export class Stivolution extends StivolutionBaseClass {
     baseDir: this.projectDir,
   });
 
+  logger = getEnv("LOGGER", true);
   botImage!: string | Buffer;
 
   constructor() {
@@ -141,11 +142,6 @@ export class Stivolution extends StivolutionBaseClass {
         }
       });
 
-      /**
-       * TODO
-       *
-       * - Send this message
-       */
       let restartId: any = getEnv("RESTART_ID", false) || "";
       if (restartId) {
         console.log("🐍 Successfully restart, sending report...");
@@ -271,7 +267,7 @@ export class Stivolution extends StivolutionBaseClass {
   }
 
   async start(): Promise<Snake> {
-    return (await this._bot.run().then(async () => {
+    const bot = await this._bot.run().then(async () => {
       // If STRING_SESSION is not configured
       if (!process.env["STRING_SESSION"]) {
         // Print one to console
@@ -289,19 +285,28 @@ export class Stivolution extends StivolutionBaseClass {
       // Configure client
       this._bot.client.floodSleepThreshold = 60;
       this._bot.client.setParseMode("html");
+    }) as Snake;
 
-      // Try to reconnect client when it disconnected
-      setInterval(async () => {
-        if (!this._bot.client._sender?._userConnected) {
-          await this._bot.client.connect().then(async () => {
-            await this._bot.telegram.sendMessage(
-                this._chatLog,
-                "Bot reconnected!"
-            );
-          });
+    // Try to reconnect client when it disconnected
+    setInterval(async () => {
+      const isUserConnected: boolean | undefined =
+          this._bot?.client?._sender?._userConnected;
+      if (isUserConnected === false) {
+        if (this.logger === "debug") {
+          this._bot.client._log.error(`Bot disconnected!`);
         }
-      }, 1000);
-    })) as Snake;
+        await this._bot.client.connect().then(async () => {
+          await this._bot.telegram.sendMessage(
+              this._chatLog,
+              "Bot reconnected!"
+          ).then(() => {
+            this._bot.client._log.info("Bot reconnected!");
+          });
+        });
+      }
+    }, 1000);
+
+    return bot;
   }
 
   wrapper(handler: CallableFunction, options: WrapperOptionsInterface) {
