@@ -12,29 +12,29 @@ bot.snake.command("about", async (ctx) => {
   let finalButton: Array<Array<inlineKeyboardButton>> = [[]];
 
   bot.wrapper(
-    async () => {
-      finalText = bot.__description__;
-      finalText +=
-        "\n\nDibuat menggunakan <a href='https://www.typescriptlang.org'>typescript</a>";
+      async () => {
+          finalText = bot.__description__;
+          finalText +=
+              "\n\nDibuat menggunakan <a href='https://www.typescriptlang.org'>typescript</a>";
 
-      finalButton = [
-        [
-          {
-            text: "🏡 Homepage",
-            url: bot.__homepage__,
-          },
-        ],
-      ];
+          finalButton = [
+              [
+                  {
+                      text: "🏡 Homepage",
+                      url: bot.__homepage__
+                  }
+              ]
+          ];
 
-      await ctx.replyWithHTML(finalText, {
-        replyMarkup: {
-          inlineKeyboard: finalButton,
-        },
-      });
-    },
-    {
-      context: ctx,
-    }
+          await ctx.replyWithHTML(finalText, {
+              replyMarkup: {
+                  inlineKeyboard: finalButton
+              }
+          });
+      },
+      {
+          context: ctx
+      }
   );
 });
 

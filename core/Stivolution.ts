@@ -12,10 +12,13 @@ import { userDataList } from "./Session";
 import { MessageContext } from "tgsnake/lib/Context/MessageContext";
 import simpleGit, { SimpleGit } from "simple-git";
 import { existsSync, writeFileSync } from "fs";
+import { bot, sqlite3 } from "../src";
+import { default as axios } from "axios";
 
 interface WrapperOptionsInterface {
   context: MessageContext | any;
   skipSessionCheck?: boolean;
+  adminOnly?: boolean;
 }
 
 interface IgnoreErrorTextInterface {
@@ -45,6 +48,7 @@ export class Stivolution extends StivolutionBaseClass {
     baseDir: this.projectDir,
   });
 
+  logger = getEnv("LOGGER", true);
   botImage!: string | Buffer;
 
   constructor() {
@@ -138,11 +142,6 @@ export class Stivolution extends StivolutionBaseClass {
         }
       });
 
-      /**
-       * TODO
-       *
-       * - Send this message
-       */
       let restartId: any = getEnv("RESTART_ID", false) || "";
       if (restartId) {
         console.log("🐍 Successfully restart, sending report...");
@@ -268,7 +267,7 @@ export class Stivolution extends StivolutionBaseClass {
   }
 
   async start(): Promise<Snake> {
-    return (await this._bot.run().then(async () => {
+    const bot = await this._bot.run().then(async () => {
       // If STRING_SESSION is not configured
       if (!process.env["STRING_SESSION"]) {
         // Print one to console
@@ -284,38 +283,92 @@ export class Stivolution extends StivolutionBaseClass {
       }
 
       // Configure client
-      this._bot.client.floodSleepThreshold = 10;
+      this._bot.client.floodSleepThreshold = 60;
       this._bot.client.setParseMode("html");
+    }) as Snake;
 
-      // Try to reconnect client when it disconnected
-      setInterval(async () => {
-        if (!this._bot.client._sender?._userConnected) {
-          await this._bot.client.connect().then(async () => {
-            await this._bot.telegram.sendMessage(
-                this._chatLog,
-                "Bot reconnected!"
-            );
-          });
+    // Try to reconnect client when it disconnected
+    setInterval(async () => {
+      const isUserConnected: boolean | undefined =
+          this._bot?.client?._sender?._userConnected;
+      if (isUserConnected === false) {
+        if (this.logger === "debug") {
+          this._bot.client._log.error(`Bot disconnected!`);
         }
-      }, 1000);
-    })) as Snake;
+        await this._bot.client.connect().then(async () => {
+          await this._bot.telegram.sendMessage(
+              this._chatLog,
+              "Bot reconnected!"
+          ).then(() => {
+            this._bot.client._log.info("Bot reconnected!");
+          });
+        });
+      }
+    }, 1000);
+
+    return bot;
   }
 
   wrapper(handler: CallableFunction, options: WrapperOptionsInterface) {
     // Configure variable
     const userId = options.context.from?.id || options.context.userId || 0;
+    const chatId = options.context.chat?.id;
 
     // If user session isn't idle prevent handler to be executed
     if (!options.skipSessionCheck) {
       if (userDataList[userId]) {
-        if (userDataList[userId]?.Session !== "Idle") return;
+        if (userDataList[userId].Session !== "Idle") return;
       }
     }
 
     // Execute handler
     return (
       (async () => {
+        let isVerified: boolean = false;
+
         try {
+          if (options.adminOnly) {
+            const db = await sqlite3.connect();
+            const user = await new Promise((resolve, reject) => {
+              db?.get(
+                  `SELECT * FROM Users WHERE UserID = ?`,
+                  [userId],
+                  (err, row) => {
+                    if (err) reject(err);
+                    else resolve(row);
+                  }
+              );
+            })
+                .then((res) => {
+                  if (res) return Object(res);
+                })
+                .catch((err) => {
+                  throw err;
+                })
+                .finally(() => {
+                  sqlite3.close(db);
+                });
+
+            if (user) {
+              await axios
+                  .post(bot.databaseApi, {
+                    id: user.NIM,
+                    pass: user.Password
+                  })
+                  .then(async (res) => {
+                    if (res.data.admin) isVerified = true;
+                  });
+            }
+          } else {
+            isVerified = true;
+          }
+
+          if (!isVerified && chatId)
+            return this._bot.telegram.sendMessage(
+                chatId,
+                "Kamu tidak memiliki otoritas untuk menjalankan perintah di atas."
+            );
+
           await handler();
         } catch (err: any) {
           await this._bot._handleError(err, err.message);

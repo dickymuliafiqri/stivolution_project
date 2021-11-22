@@ -1,6 +1,6 @@
 {
   "name": "stivolution_project",
-  "version": "0.0.2-gndrng.4",
+  "version": "0.0.2-gndrng.5",
   "description": "Projek integrasi database stikom dengan telegram bot",
   "main": "app/index.js",
   "scripts": {
@@ -31,9 +31,9 @@
     "pm2": "^5.1.2",
     "simple-git": "^2.47.0",
     "speedtest-net": "^2.2.0",
-    "sqlite3": "^4.2.0",
-    "systeminformation": "^5.9.12",
-    "telegram": "^1.9.6",
-    "tgsnake": "^2.0.0-alpha.1"
+    "sqlite3": "^5.0.2",
+    "systeminformation": "^5.9.15",
+    "telegram": "^1.10.8",
+    "tgsnake": "2.0.0-alpha.3"
   }
 }

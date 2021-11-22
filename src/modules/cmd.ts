@@ -59,7 +59,8 @@ bot.snake.hears(lsRegExp, async (ctx) => {
       await ctx.replyWithHTML(finalText);
     },
     {
-      context: ctx,
+        context: ctx,
+        adminOnly: true
     }
   );
 });
@@ -106,9 +107,10 @@ bot.snake.hears(execRegExp, async (ctx) => {
         await ctx.reply(`Child process exit with code ${code}`);
       });
     },
-    {
-      context: ctx,
-    }
+      {
+          context: ctx,
+          adminOnly: true
+      }
   );
 });
 
