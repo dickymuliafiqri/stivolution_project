@@ -6,6 +6,7 @@
 
 import { bot } from "..";
 import { Api } from "telegram/tl";
+import { bannedUser, userFloodControl } from "../../core/Session";
 
 // RegExp
 const commandPrefix: RegExp = /^[\/!.]/;
@@ -58,9 +59,53 @@ bot.snake.hears(commandPrefix, async (ctx) => {
     sendAction(new Api.SendMessageTypingAction());
   } else if (action(uploadPhoto)) {
     sendAction(
-      new Api.SendMessageUploadPhotoAction({
-        progress: 0,
-      })
+        new Api.SendMessageUploadPhotoAction({
+          progress: 0
+        })
     );
   }
+});
+
+// Flood handler
+bot.snake.hears(commandPrefix, async (ctx) => {
+  bot.wrapper(
+      async () => {
+        const userId: number = ctx.from.id;
+        const command: string = String(ctx.text).split(" ")[0];
+
+        if (!userFloodControl[userId]) {
+          userFloodControl[userId] = [
+            {
+              command,
+              number: 1
+            }
+          ];
+        } else {
+          for (const floodIndex in userFloodControl[userId]) {
+            if (userFloodControl[userId][floodIndex].command === command) {
+              const number: number = userFloodControl[userId][floodIndex].number;
+
+              if (number > 5) {
+                bannedUser[userId] = {
+                  minute: 3,
+                  warned: false
+                };
+                return;
+              }
+
+              userFloodControl[userId][floodIndex].number = number + 1;
+              return;
+            }
+          }
+
+          userFloodControl[userId].push({
+            command,
+            number: 1
+          });
+        }
+      },
+      {
+        context: ctx
+      }
+  );
 });

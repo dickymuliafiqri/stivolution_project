@@ -8,7 +8,7 @@ import packageData from "../package.json";
 import si from "systeminformation";
 import { Snake } from "tgsnake";
 import { getEnv } from "../src/utils/Utilities";
-import { userDataList } from "./Session";
+import { bannedUser, userDataList } from "./Session";
 import { MessageContext } from "tgsnake/lib/Context/MessageContext";
 import simpleGit, { SimpleGit } from "simple-git";
 import { existsSync, writeFileSync } from "fs";
@@ -267,7 +267,7 @@ export class Stivolution extends StivolutionBaseClass {
   }
 
   async start(): Promise<Snake> {
-    const bot = await this._bot.run().then(async () => {
+    const bot = (await this._bot.run().then(async () => {
       // If STRING_SESSION is not configured
       if (!process.env["STRING_SESSION"]) {
         // Print one to console
@@ -285,7 +285,7 @@ export class Stivolution extends StivolutionBaseClass {
       // Configure client
       this._bot.client.floodSleepThreshold = 60;
       this._bot.client.setParseMode("html");
-    }) as Snake;
+    })) as Snake;
 
     // Try to reconnect client when it disconnected
     setInterval(async () => {
@@ -296,12 +296,11 @@ export class Stivolution extends StivolutionBaseClass {
           this._bot.client._log.error(`Bot disconnected!`);
         }
         await this._bot.client.connect().then(async () => {
-          await this._bot.telegram.sendMessage(
-              this._chatLog,
-              "Bot reconnected!"
-          ).then(() => {
-            this._bot.client._log.info("Bot reconnected!");
-          });
+          await this._bot.telegram
+              .sendMessage(this._chatLog, "Bot reconnected!")
+              .then(() => {
+                this._bot.client._log.info("Bot reconnected!");
+              });
         });
       }
     }, 1000);
@@ -325,6 +324,21 @@ export class Stivolution extends StivolutionBaseClass {
     return (
       (async () => {
         let isVerified: boolean = false;
+
+        if (bannedUser[userId]) {
+          if (!bannedUser[userId].warned) {
+            bannedUser[userId].warned = true;
+            const bannedText: string = `kamu diblokir...\n<i>coba lagi dalam ${bannedUser[userId].minute} menit</i>`;
+
+            try {
+              return await options.context.replyWithHTML(bannedText);
+            } catch (e) {
+              return await this._bot.telegram.sendMessage(userId, bannedText);
+            }
+          } else {
+            return;
+          }
+        }
 
         try {
           if (options.adminOnly) {
@@ -363,9 +377,8 @@ export class Stivolution extends StivolutionBaseClass {
             isVerified = true;
           }
 
-          if (!isVerified && chatId)
-            return this._bot.telegram.sendMessage(
-                chatId,
+          if (!isVerified)
+            return options.context.replyWithHTML(
                 "Kamu tidak memiliki otoritas untuk menjalankan perintah di atas."
             );
 
