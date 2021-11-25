@@ -16,14 +16,13 @@ bot.snake.hears(broadcastRegExp, async (ctx) => {
             const text: string = match[1];
             const db = await sqlite3.connect();
 
-            let sentBroadcast: number = 0;
             let failedBroadcast: number = 0;
             let finalText: string = "<b>Mengirimkan Pesan Ke Semua Pengguna</b>";
             finalText += "\n----------\n";
             finalText += `\nPesan: <code>${text}</code>`;
 
-            const buildFinalBroadcastText = (of: number) => {
-                let broadcastText: string = `\nBerhasil: ${sentBroadcast} dari ${of}`;
+            const buildFinalBroadcastText = (receiver: number) => {
+                let broadcastText: string = `\nPenerima: ${receiver}`;
                 broadcastText += `\nGagal: ${failedBroadcast}\n`;
                 broadcastText +=
                     "\n<i>ID yang gagal menerima pesan akan dihapus dari daftar pengguna</i>";
@@ -64,9 +63,6 @@ bot.snake.hears(broadcastRegExp, async (ctx) => {
                     .sendMessage(userId, {
                         message: text,
                         parseMode: "html"
-                    })
-                    .then(() => {
-                        sentBroadcast += 1;
                     })
                     .catch((err) => {
                         failedBroadcast += 1;

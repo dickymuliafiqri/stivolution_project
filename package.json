@@ -1,11 +1,13 @@
 {
   "name": "stivolution_project",
-  "version": "0.0.4-sngsem.4",
+  "version": "0.0.4-sngsem.5",
   "description": "Projek integrasi database stikom dengan telegram bot",
   "main": "app/index.js",
   "scripts": {
-    "start": "npx tsc && npx pm2 start app/src/index.js --name Stivolution --no-daemon --restart-delay 5000 -f",
-    "dev": "npx tsc && npx pm2 start app/src/index.js --name Stivolution --no-daemon --restart-delay 5000 --watch app/ -f"
+    "build": "npx tsc",
+    "start": "npx pm2 start app/src/index.js --name Stivolution --no-daemon --restart-delay 5000 -f",
+    "dev": "npx pm2 start app/src/index.js --name Stivolution --no-daemon --restart-delay 5000 --watch app/ -f",
+    "test": "node app/src/index.js --test"
   },
   "repository": {
     "type": "git",

@@ -15,6 +15,8 @@ import { existsSync, writeFileSync } from "fs";
 import { bot, sqlite3 } from "../src";
 import { default as axios } from "axios";
 
+const isTest: boolean = process.argv.includes("--test");
+
 interface WrapperOptionsInterface {
   context: MessageContext | any;
   skipSessionCheck?: boolean;
@@ -139,7 +141,12 @@ export class Stivolution extends StivolutionBaseClass {
       console.log("🐍 Sending botInfo to CHAT_LOG...");
       await this._bot.telegram.sendPhoto(this._chatLog, this.botImage, {
         caption: await this.buildBotInfo(),
-        parseMode: "HTML",
+        parseMode: "HTML"
+      }).finally(async () => {
+        if (isTest) {
+          // @ts-ignore
+          await import("../test");
+        }
       });
     });
   }
