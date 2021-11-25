@@ -47,10 +47,10 @@ bot.snake.command("alive", async (ctx) => {
                     .buildBotInfo()
                     .then(
                         (res) =>
-                            `${res}\n\n💡 Uptime ${days ? days + " hari " : ""}${
-                                hours ? hours + " jam " : ""
-                            }${minutes ? minutes + " menit " : ""} ${
-                                seconds.toFixed() + " detik"
+                            `${res}\n\n💡 Uptime ${days ? days + " days " : ""}${
+                                hours ? hours + " hours " : ""
+                            }${minutes ? minutes + " minutes " : ""} ${
+                                seconds.toFixed() + " seconds"
                             }`
                     ),
                 parseMode: "HTML"

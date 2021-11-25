@@ -45,6 +45,8 @@ export function bannedTimeCounter() {
         minute: minute - 1,
         warned: false
       };
+    } else {
+      delete bannedUser[Number(userId)];
     }
   });
 }

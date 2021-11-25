@@ -57,7 +57,6 @@ export class Stivolution extends StivolutionBaseClass {
     // Initialize error handler
     this._bot.catch(async (err, ctx) => {
       const chatId = ctx?.chat?.id || ctx?.userId;
-      const trigger: string = String(ctx?.text || ctx?.data?.toString());
       let context: string;
 
       // Ignore error
@@ -379,7 +378,7 @@ export class Stivolution extends StivolutionBaseClass {
 
           if (!isVerified)
             return options.context.replyWithHTML(
-                "Kamu tidak memiliki otoritas untuk menjalankan perintah di atas."
+                "Kamu tidak memiliki otoritas untuk menjalankan perintah ini."
             );
 
           await handler();
