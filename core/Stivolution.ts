@@ -21,11 +21,6 @@ interface WrapperOptionsInterface {
   adminOnly?: boolean;
 }
 
-interface IgnoreErrorTextInterface {
-  trigger?: string | RegExp;
-  errorMessage: string;
-}
-
 interface HelpInterface {
   [key: string]: string;
 }
@@ -58,22 +53,6 @@ export class Stivolution extends StivolutionBaseClass {
     this._bot.catch(async (err, ctx) => {
       const chatId = ctx?.chat?.id || ctx?.userId;
       let context: string;
-
-      // Ignore error
-      /**
-       * TODO
-       *
-       * We use this guy for now
-       * Need to find the better way to ignore errors
-       */
-      const ignoreErrorText: Array<IgnoreErrorTextInterface> = [
-        {
-          errorMessage: "MESSAGE_NOT_MODIFIED"
-        }
-      ];
-      for (const ignoredError of ignoreErrorText) {
-        if (err?.message?.match(ignoredError.errorMessage)) return;
-      }
 
       // Stringify context
       try {

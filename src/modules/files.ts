@@ -32,7 +32,6 @@ bot.snake.hears(upRegExp, async (ctx) => {
         async () => {
             const match: any = ctx.text?.match(upRegExp);
             const filePath: string = `${bot.projectDir}/${match[1]}`;
-            let outMsg: any;
 
             // Filter
             if (!existsSync(filePath))
@@ -50,11 +49,11 @@ bot.snake.hears(upRegExp, async (ctx) => {
                 if (!editMsg) editMsg = true;
             }, 7000);
 
-            await ctx
-                .replyWithHTML(`${finalText}\n${progressText(0)}`)
-                .then((res) => {
-                    outMsg = res.message || res;
-                });
+            const outMsg = await bot.snake.client.sendMessage(ctx.chat.id, {
+                message: `${finalText}\n${progressText(0)}`,
+                replyTo: ctx.id,
+                parseMode: "html"
+            });
 
             await bot.snake.client
                 .sendFile(ctx.chat.id, {
@@ -63,23 +62,24 @@ bot.snake.hears(upRegExp, async (ctx) => {
                     forceDocument: true,
                     caption: finalText,
                     parseMode: "html",
-                    progressCallback: async (progress) => {
+                    progressCallback: (progress) => {
                         if (editMsg) {
                             editMsg = false;
-                            await bot.snake.telegram.editMessage(
-                                ctx.chat.id,
-                                outMsg.id,
-                                `${finalText}\n${progressText(progress)}`,
-                                {
-                                    parseMode: "html",
-                                    noWebpage: true
-                                }
-                            );
+                            bot.snake.client.editMessage(ctx.chat.id, {
+                                message: outMsg,
+                                text: `${finalText}\n${progressText(progress)}`,
+                                parseMode: "html",
+                                linkPreview: false
+                            }).catch((err) => {
+                                if (!err.message.match("MESSAGE_NOT_MODIFIED")) throw err;
+                            });
                         }
                     }
                 })
-                .then(async () => {
-                    await bot.snake.telegram.deleteMessage(ctx.chat.id, [outMsg.id]);
+                .then(() => {
+                    bot.snake.client.deleteMessages(ctx.chat.id, [outMsg.id], {
+                        revoke: true
+                    });
                 });
         },
         {
