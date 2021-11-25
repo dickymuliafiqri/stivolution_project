@@ -324,7 +324,7 @@ export class Stivolution extends StivolutionBaseClass {
       (async () => {
         let isVerified: boolean = false;
 
-        if (bannedUser[userId]) {
+        if (bannedUser[userId]?.minute) {
           if (!bannedUser[userId].warned) {
             bannedUser[userId].warned = true;
             const bannedText: string = `kamu diblokir...\n<i>coba lagi dalam ${bannedUser[userId].minute} menit</i>`;
