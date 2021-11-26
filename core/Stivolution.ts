@@ -139,15 +139,19 @@ export class Stivolution extends StivolutionBaseClass {
       }
 
       console.log("🐍 Sending botInfo to CHAT_LOG...");
-      await this._bot.telegram.sendPhoto(this._chatLog, this.botImage, {
-        caption: await this.buildBotInfo(),
-        parseMode: "HTML"
-      }).finally(async () => {
-        if (isTest) {
-          // @ts-ignore
-          await import("../test");
-        }
-      });
+      await this._bot.client
+          .sendMessage(this._chatLog, {
+            message: await this.buildBotInfo(),
+            parseMode: "html",
+            file: this.botImage,
+            linkPreview: false
+          })
+          .finally(async () => {
+            if (isTest) {
+              // @ts-ignore
+              await import("../test");
+            }
+          });
     });
   }
 
