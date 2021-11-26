@@ -23,7 +23,7 @@ jobs:
         node-version: [14.x, 16.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
       fail-fast: false
-      max-parallel: 3
+      max-parallel: 2
 
     env:
       API_ID: ${{ secrets.API_ID }}
@@ -32,6 +32,7 @@ jobs:
       LOGGER: ${{ secrets.LOGGER }}
       DB_API: ${{ secrets.DB_API }}
       CHAT_LOG: ${{ secrets.CHAT_LOG }}
+      STRING_SESSION: ${{ secrets.STRING_SESSION }}
 
     steps:
     - uses: actions/checkout@v2
