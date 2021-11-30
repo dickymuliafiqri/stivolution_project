@@ -277,22 +277,22 @@ export class Stivolution extends StivolutionBaseClass {
     })) as Snake;
 
     // Try to reconnect client when it disconnected
-    setInterval(async () => {
-      const isUserConnected: boolean | undefined =
-          this._bot?.client?._sender?._userConnected;
-      if (isUserConnected === false) {
-        if (this.logger === "debug") {
-          this._bot.client._log.error(`Bot disconnected!`);
-        }
-        await this._bot.client.connect().then(async () => {
-          await this._bot.telegram
-              .sendMessage(this._chatLog, "Bot reconnected!")
-              .then(() => {
-                this._bot.client._log.info("Bot reconnected!");
-              });
-        });
-      }
-    }, 1000);
+    // setInterval(async () => {
+    //   const isUserConnected: boolean | undefined =
+    //       this._bot?.client?._sender?._userConnected;
+    //   if (isUserConnected === false) {
+    //     if (this.logger === "debug") {
+    //       this._bot.client._log.error(`Bot disconnected!`);
+    //     }
+    //     await this._bot.client.connect().then(async () => {
+    //       await this._bot.telegram
+    //           .sendMessage(this._chatLog, "Bot reconnected!")
+    //           .then(() => {
+    //             this._bot.client._log.info("Bot reconnected!");
+    //           });
+    //     });
+    //   }
+    // }, 1000);
 
     return bot;
   }

@@ -184,7 +184,7 @@ bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
                 await bot.snake.telegram
                     .editMessage(chatId, ctx.msgId, "Restarting bot...")
                     .then(() => {
-                        exec("pm2 restart Stivolution");
+                        exec("npx forever restart app/src/index.js");
                     });
             });
         } else if (data.match(/Update$/)) {

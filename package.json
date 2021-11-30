@@ -5,8 +5,8 @@
   "main": "app/index.js",
   "scripts": {
     "build": "npx tsc",
-    "start": "npx pm2 start app/src/index.js --name Stivolution --no-daemon --restart-delay 5000 -f",
-    "dev": "npx pm2 start app/src/index.js --name Stivolution --no-daemon --restart-delay 5000 --watch app/ -f",
+    "start": "npx forever --minUptime 1000 --spinSleepTime 5000 app/src/index.js",
+    "dev": "npx forever --minUptime 1000 --spinSleepTime 5000 -w --watchDirectory app/ app/src/index.js",
     "test": "node app/src/index.js --test"
   },
   "repository": {
@@ -20,22 +20,24 @@
   },
   "homepage": "https://github.com/dickymuliafiqri/stivolution_project#readme",
   "devDependencies": {
-    "@types/node": "^16.11.9",
-    "@types/sqlite3": "^3.1.7",
-    "@types/speedtest-net": "^2.1.1",
-    "prettier": "^2.4.1",
-    "typescript": "^4.5.2"
+    "prettier": "^2.4.1"
   },
   "dependencies": {
+    "@types/node": "^16.11.9",
+    "@types/speedtest-net": "^2.1.1",
+    "@types/sqlite3": "^3.1.7",
     "axios": "^0.24.0",
     "dotenv": "^10.0.0",
+    "fast-folder-size": "^1.6.1",
+    "forever": "^4.0.1",
+    "lzma-native": "^8.0.1",
     "node-cron": "^3.0.0",
-    "pm2": "^5.1.2",
     "simple-git": "^2.47.0",
     "speedtest-net": "^2.2.0",
     "sqlite3": "^5.0.2",
     "systeminformation": "^5.9.15",
     "telegram": "^1.10.8",
-    "tgsnake": "2.0.0-alpha.3"
+    "tgsnake": "2.0.0-alpha.3",
+    "typescript": "^4.5.2"
   }
 }
