@@ -9,7 +9,7 @@ import { inlineKeyboardButton } from "tgsnake/lib/Utils/ReplyMarkup";
 import { userDataList } from "../../core/Session";
 import { default as axios } from "axios";
 import { Api } from "telegram/tl";
-import { exec, spawn } from "child_process";
+import { execSync } from "child_process";
 import { writeFile } from "fs/promises";
 
 bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
@@ -18,7 +18,6 @@ bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
     let userId: any;
     let uChatId: any;
     let chatId: any;
-    let outMsg: any;
     bot.wrapper(
         async () => {
             // @ts-ignore
@@ -46,26 +45,26 @@ bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
                 );
 
             if (data.startsWith("01")) {
-        if (data.match(/Login$/)) {
-          const db = await sqlite3.connect();
-          const { Password, NIM } = userDataList[userId];
+                if (data.match(/Login$/)) {
+                    const db = await sqlite3.connect();
+                    const { Password, NIM } = userDataList[userId];
 
-          // Check if user is already logged in on another device
-          const user = await new Promise((resolve, reject) => {
-            db?.get(`SELECT * FROM Users WHERE NIM = ?`, [NIM], (err, row) => {
-              if (err) reject(err);
-              else resolve(row);
-            });
-          }).catch((err) => {
-            throw err;
-          });
+                    // Check if user is already logged in on another device
+                    const user = await new Promise((resolve, reject) => {
+                        db?.get(`SELECT * FROM Users WHERE NIM = ?`, [NIM], (err, row) => {
+                            if (err) reject(err);
+                            else resolve(row);
+                        });
+                    }).catch((err) => {
+                        throw err;
+                    });
 
-          if (!user) {
-            await axios
-              .post(bot.databaseApi, {
-                id: NIM,
-                pass: Password,
-              })
+                    if (!user) {
+                        await axios
+                            .post(bot.databaseApi, {
+                                id: NIM,
+                                pass: Password
+                            })
               .then(async () => {
                 await new Promise((resolve, reject) => {
                   db?.run(
@@ -133,150 +132,153 @@ bot.snake.on("UpdateBotCallbackQuery", async (ctx) => {
             revoke: true,
           });
         } else if (data.match(/Logout$/)) {
-            const db = await sqlite3.connect();
+                    const db = await sqlite3.connect();
 
-            await new Promise((resolve, reject) => {
-                db?.run(`DELETE FROM Users WHERE UserID = ?`, [userId], (err) => {
-                    if (err) reject(err);
-                    else resolve("OK");
-                });
-            })
-                .then(() => {
-                    finalText = "Berhasil logout";
-                })
-                .catch((err) => {
-                    throw err;
-                })
-                .finally(() => {
-                    sqlite3.close(db);
-                });
-            await bot.snake.client.deleteMessages(chatId, [ctx.msgId], {
-                revoke: true
-            });
-        } else if (data.match(/Restart/)) {
-            // Write temp.env
-            await writeFile(
-                `${bot.projectDir}/temp.env`,
-                `RESTART_ID=${uChatId}::${ctx.msgId}`,
-                {
-                    flag: "w+"
-                }
-            );
-
-            // Edit message and delete modules
-            await bot.snake.telegram
-                .editMessage(chatId, ctx.msgId, "Cleaning modules...")
-                .then((res) => {
-                    outMsg = res.message || res;
-                    exec("rm -rf app/src/modules");
-                });
-
-            // Recompile code
-            await bot.snake.telegram.editMessage(
-                chatId,
-                ctx.msgId,
-                "Compiling code..."
-            );
-            const compile = spawn("npx", ["tsc"]);
-
-            // Restart the bot
-            compile.on("close", async () => {
-                await bot.snake.telegram
-                    .editMessage(chatId, ctx.msgId, "Restarting bot...")
-                    .then(() => {
-                        process.kill(process.pid);
+                    await new Promise((resolve, reject) => {
+                        db?.run(`DELETE FROM Users WHERE UserID = ?`, [userId], (err) => {
+                            if (err) reject(err);
+                            else resolve("OK");
+                        });
+                    })
+                        .then(() => {
+                            finalText = "Berhasil logout";
+                        })
+                        .catch((err) => {
+                            throw err;
+                        })
+                        .finally(() => {
+                            sqlite3.close(db);
+                        });
+                    await bot.snake.client.deleteMessages(chatId, [ctx.msgId], {
+                        revoke: true
                     });
-            });
-        } else if (data.match(/Update$/)) {
-            // Pull from remote/origin
-            const pull = async () => {
-                await bot.git.pull(
-                    "origin",
-                    bot.branch,
-                    ["-X", "theirs"],
-                    (err, res) => {
-                        if (err) throw err;
-
-                        finalText = `<b>Pembaruan ${bot.branch} berhasil</b>`;
-                        finalText += "\n----------\n";
-
-                        finalText += "\nRangkuman";
-                        finalText += `\n- Perubahan: ${res.summary.changes}`;
-                        finalText += `\n- Penghapusan: ${res.summary.deletions}`;
-                        finalText += `\n- Penambahan: ${res.summary.insertions}`;
-                        finalText +=
-                            "\n\n<i>Tekan tombol di bawah untuk memulai ulang</i>";
-
-                        finalButton[0][0] = {
-                            text: "Mulai Ulang",
-                            callbackData: "01/Restart"
-                        };
-                    }
-                );
-            };
-
-            // Clean local repo before pulling from upstream
-            await bot.git.clean("f", ["-d"]);
-
-            // Reset workspace if conflict happens
-            await pull().catch(async (err: any) => {
-                await bot.snake.telegram.sendMessage(
-                    chatId,
-                    "Failed pull origin\n" + err.message
-                );
-                if (err.message.match("Auto-merging")) {
-                    await bot.snake.telegram.sendMessage(chatId, "Try to hard reset...");
-                    await bot.git.reset(["--hard", bot.branch]);
-                    await pull();
-                } else {
-                    throw err;
-                }
-            });
-
-            await bot.snake.telegram.editMessage(chatId, ctx.msgId, message.text);
-            await bot.snake.telegram
-                .sendMessage(chatId, finalText, {
-                    parseMode: "HTML",
-                    replyToMsgId: replyToMessage.id,
-                    replyMarkup: finalButton[0][0]
-                        ? {
-                            inlineKeyboard: finalButton
+                } else if (data.match(/Restart/)) {
+                    // Write temp.env
+                    await writeFile(
+                        `${bot.projectDir}/temp.env`,
+                        `RESTART_ID=${uChatId}::${ctx.msgId}`,
+                        {
+                            flag: "w+"
                         }
-                        : undefined
-                })
-                .then(() => {
-                    finalText = "";
-                });
-        } else if (data.match(/ChangeBranch .+/)) {
-            const selBranch: string = data.split(" ")[1];
-            bot.branch = selBranch;
+                    );
 
-            // Checkout branch
-            await bot.git.checkout(["-B", selBranch]);
-            await bot.git.reset(["--hard", `origin/${selBranch}`]);
+                    // Edit message and delete modules
+                    await bot.snake.telegram.editMessage(
+                        chatId,
+                        ctx.msgId,
+                        "Cleaning modules..."
+                    );
+                    execSync("rm -rf app/src/modules");
 
-            finalText = `Berhasil berganti branch ke ${selBranch}`;
-            let finalButton: Array<Array<inlineKeyboardButton>> = [
-                [
-                    {
-                        text: "Restart",
-                        callbackData: "01/Restart"
-                    }
-                ]
-            ];
+                    // Recompile code
+                    await bot.snake.telegram.editMessage(
+                        chatId,
+                        ctx.msgId,
+                        "Compiling code..."
+                    );
+                    execSync("npx tsc");
 
-            await bot.snake.telegram.editMessage(
-                chatId,
-                ctx.msgId,
-                finalText + "\n\n<i>Silahkan mulai ulang untuk menerapkan branch</i>",
-                {
-                    parseMode: "HTML",
-                    replyMarkup: {
-                        inlineKeyboard: finalButton
-                    }
+                    // Restart the bot
+                    await bot.snake.telegram.editMessage(
+                        chatId,
+                        ctx.msgId,
+                        "Restarting bot..."
+                    );
+                    execSync("npx forever restart app/src/index.js");
+                } else if (data.match(/Update$/)) {
+                    // Pull from remote/origin
+                    const pull = async () => {
+                        await bot.git.pull(
+                            "origin",
+                            bot.branch,
+                            ["-X", "theirs"],
+                            (err, res) => {
+                                if (err) throw err;
+
+                                finalText = `<b>Pembaruan ${bot.branch} berhasil</b>`;
+                                finalText += "\n----------\n";
+
+                                finalText += "\nRangkuman";
+                                finalText += `\n- Perubahan: ${res.summary.changes}`;
+                                finalText += `\n- Penghapusan: ${res.summary.deletions}`;
+                                finalText += `\n- Penambahan: ${res.summary.insertions}`;
+                                finalText +=
+                                    "\n\n<i>Tekan tombol di bawah untuk memulai ulang</i>";
+
+                                finalButton[0][0] = {
+                                    text: "Mulai Ulang",
+                                    callbackData: "01/Restart"
+                                };
+                            }
+                        );
+                    };
+
+                    // Clean local repo before pulling from upstream
+                    await bot.git.clean("f", ["-d"]);
+
+                    // Reset workspace if conflict happens
+                    await pull().catch(async (err: any) => {
+                        await bot.snake.telegram.sendMessage(
+                            chatId,
+                            "Failed pull origin\n" + err.message
+                        );
+                        if (err.message.match("Auto-merging")) {
+                            await bot.snake.telegram.sendMessage(
+                                chatId,
+                                "Try to hard reset..."
+                            );
+                            await bot.git.reset(["--hard", bot.branch]);
+                            await pull();
+                        } else {
+                            throw err;
+                        }
+                    });
+
+                    await bot.snake.telegram.editMessage(chatId, ctx.msgId, message.text);
+                    await bot.snake.telegram
+                        .sendMessage(chatId, finalText, {
+                            parseMode: "HTML",
+                            replyToMsgId: replyToMessage.id,
+                            replyMarkup: finalButton[0][0]
+                                ? {
+                                    inlineKeyboard: finalButton
+                                }
+                                : undefined
+                        })
+                        .then(() => {
+                            finalText = "";
+                        });
+                } else if (data.match(/ChangeBranch .+/)) {
+                    const selBranch: string = data.split(" ")[1];
+                    bot.branch = selBranch;
+
+                    // Checkout branch
+                    await bot.git.checkout(["-B", selBranch]);
+                    await bot.git.reset(["--hard", `origin/${selBranch}`]);
+
+                    finalText = `Berhasil berganti branch ke ${selBranch}`;
+                    let finalButton: Array<Array<inlineKeyboardButton>> = [
+                        [
+                            {
+                                text: "Restart",
+                                callbackData: "01/Restart"
+                            }
+                        ]
+                    ];
+
+                    await bot.snake.telegram.editMessage(
+                        chatId,
+                        ctx.msgId,
+                        finalText +
+                        "\n\n<i>Silahkan mulai ulang untuk menerapkan branch</i>",
+                        {
+                            parseMode: "HTML",
+                            replyMarkup: {
+                                inlineKeyboard: finalButton
+                            }
+                        }
+                    );
                 }
-            );
-        }
 
                 if (finalText) {
                     await bot.snake.client.invoke(
